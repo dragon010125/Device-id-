@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Device ID Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'El Messiri', sans-serif;
+      background: linear-gradient(to bottom right, #ccefff, #e6f7ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .device-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    .device-box h1 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #00bcd4;
+    }
+    .device-id {
+      font-size: 14px;
+      word-break: break-word;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<div class="device-box">
+  <h1>Your Device ID</h1>
+  <div class="device-id" id="deviceId">Loading...</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDtzcdsPCv8SXIB_q1md-wQ0Ql-pEvHzLc",
+    authDomain: "premium-dragon.firebaseapp.com",
+    databaseURL: "https://premium-dragon-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "premium-dragon",
+    storageBucket: "premium-dragon.appspot.com",
+    messagingSenderId: "669522001241",
+    appId: "1:669522001241:ios:580f3802f8a3fcb8292048"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Create unique device ID (simple hash using userAgent + timezone)
+  function generateDeviceId() {
+    const raw = navigator.userAgent + Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+      hash |= 0;
+    }
+    return 'DEV-' + Math.abs(hash);
+  }
+
+  const deviceId = generateDeviceId();
+  document.getElementById("deviceId").innerText = deviceId;
+
+  // Optional: Save to Firebase under /devices
+  db.ref("devices/" + deviceId).set({
+    userAgent: navigator.userAgent,
+    time: Date.now()
+  });
+</script>
+
+</body>
+</html>
